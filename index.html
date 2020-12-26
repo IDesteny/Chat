@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<body>
+	<form id="msg-form">
+		<input id="msg">
+		<button type="submit"> Send </button>
+	</form>
+	<div id="all-msg"></div>
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
+	<script>
+		$(function() {
+			const socket = io.connect();
+
+			$("#msg-form").submit((event) => {
+				event.preventDefault();
+
+				const $input = $("#msg");
+				socket.emit('send msg', $input.val());
+				$input.val('');
+			});
+
+			socket.on('add msg', (data) => {
+				$("#all-msg").append("<div>" + data.msg + "</div>");
+			});
+		});
+	</script>
+</body>
+</html>
