@@ -16,7 +16,7 @@
 	<script>
 		$(function() {
 			const socket = io.connect();
-			let name_user = window.location.search.substring(6);
+			const name_user = decodeURI(window.location.search.substring(6));
 
 			$("#msg-form").submit((event) => {
 				event.preventDefault();
@@ -27,7 +27,7 @@
 			});
 
 			socket.on('add msg', (data) => {
-				$("#all-msg").append("<div>" + data.name + ': ' + data.msg + "</div>");
+				$("#all-msg").append("<div>" + '<' + data.name + '> ' + data.msg + "</div>");
 			});
 		});
 	</script>
