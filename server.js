@@ -8,6 +8,10 @@ app.get('/', (req, res) => {
 	res.sendFile(__dirname + '/index.html');
 });
 
+app.get('/chat', (req, res) => {
+	res.sendFile(__dirname + '/chat.html');
+});
+
 conections = [];
 
 io.sockets.on('connection', (socket) => {
@@ -18,6 +22,6 @@ io.sockets.on('connection', (socket) => {
 	});
 
 	socket.on('send msg', (data) => {
-		io.sockets.emit('add msg', { msg: data });
+		io.sockets.emit('add msg', { name: data.name, msg: data.msg });
 	});
 });
