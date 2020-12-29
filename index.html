@@ -5,9 +5,34 @@
 	<h1> Авторизация </h1>
 </head>
 <body>
-	<form id="name-form" action="chat" method="GET">
-		<input name="name">
+	<form id="name-form" action="chat" method="post">
+		<input id="name", name="name">
 		<button type="submit"> Send </button>
 	</form>
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+	<script>
+		function checkOfCorrectName(name) {
+			if (name.length >= 16) return true;
+			if (name.length == 0) return true;
+
+			for(let i = 0; i < name.length; ++i) {
+				if (name[i] != ' ') return false;
+			}
+			return true;
+		}
+
+		$(() => {
+			$("#name-form").submit((event) => {
+				const $input = $("#name");
+				if (checkOfCorrectName($input.val())) {
+					alert("Error!");
+					$input.val('');
+					event.preventDefault();
+					return;
+				}
+			});
+		});
+	</script>
 </body>
 </html>

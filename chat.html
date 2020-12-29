@@ -9,25 +9,66 @@
 		<input id="msg">
 		<button type="submit"> Send </button>
 	</form>
-	<div id="all-msg"></div>
+	<div style="float: left"> Messages </div>
+	<div style="margin: 0px 500px"> Connections </div>
+	<div id="all-msg" style="float: left"> </div>
+	<div id="all-users" style="margin: 0px 500px"> </div>
 
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
 	<script src="/socket.io/socket.io.js"></script>
 	<script>
-		$(function() {
+		function checkOfCorrectMsg(name) {
+			if (name.length >= 128) return true;
+			if (name.length == 0) return true;
+
+			for(let i = 0; i < name.length; ++i) {
+				if (name[i] != ' ') return false;
+			}
+			return true;
+		}
+
+		list_users = [];
+
+		function show() {
+			$("#all-users").empty();
+			for (let i = 0; i < list_users.length; ++i) {
+				$("#all-users").append("<div>" + list_users[i] + "</div>");
+			}
+		}
+
+		$(() => {
 			const socket = io.connect();
-			const name_user = decodeURI(window.location.search.substring(6));
 
 			$("#msg-form").submit((event) => {
 				event.preventDefault();
 
 				const $input = $("#msg");
-				socket.emit('send msg', { name: name_user, msg: $input.val() });
+				if (checkOfCorrectMsg($input.val())) {
+					alert("Error!");
+					$input.val('');
+					return;
+				}
+				socket.emit('send msg', { msg: $input.val() });
 				$input.val('');
 			});
 
 			socket.on('add msg', (data) => {
-				$("#all-msg").append("<div>" + '<' + data.name + '> ' + data.msg + "</div>");
+				$("#all-msg").append("<div>" + data.name + ': ' + data.msg + "</div>");
+			});
+
+			socket.on('send all users', (data) => {
+				list_users.push(data.name);
+				show();
+			});
+
+			socket.on('append user', (data) => {
+				list_users.push(data.name);
+				show();
+			});
+
+			socket.on('delete user', (data) => {
+				list_users.splice(list_users.indexOf(data.name), 1);
+				show();
 			});
 		});
 	</script>
