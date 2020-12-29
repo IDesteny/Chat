@@ -35,7 +35,7 @@ io.sockets.on('connection', (socket) => {
 
 	socket.on('disconnect', (data) => {
 		const index = getIndex(socket);
-		io.sockets.emit('delete user', { name: name });
+		io.sockets.emit('delete user', { name: connections[index].name });
 		connections.splice(index, 1);
 	});
 
