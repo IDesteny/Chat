@@ -2,29 +2,31 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<h1> Добро пожаловать чертила! </h1>
+	<h1> Добро пожаловать </h1>
 </head>
 <body>
 	<form id="msg-form">
 		<input id="msg">
 		<button type="submit"> Send </button>
 	</form>
+
+	<!-- TODO: Rewrite it -->
 	<div style="float: left"> Messages </div>
 	<div style="margin: 0px 500px"> Connections </div>
+
 	<div> ------------------------------------------------------------------------------------------------------------- </div>
 
-	<div id="all-msg" style="float: left"> </div>
-	<div id="all-users" style="margin: 0px 500px"> </div>
+	<div id="all-msg" style="float: left"></div>
+	<div id="all-users" style="margin: 0px 500px"></div>
+	<!----------------------->
 
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
-	<script src="/socket.io/socket.io.js"></script>
-	<script>
-		function checkOfCorrectMsg(name) {
-			if (name.length >= 128) return true;
-			if (name.length == 0) return true;
+	<script type="text/javascript">
+		function checkOfCorrectMsg(msg) {
+			if (msg.length >= 128) return true;
+			if (msg.length == 0) return true;
 
-			for(let i = 0; i < name.length; ++i) {
-				if (name[i] != ' ') return false;
+			for(let i = 0; i < msg.length; ++i) {
+				if (msg[i] != ' ') return false;
 			}
 			return true;
 		}
@@ -37,42 +39,9 @@
 				$("#all-users").append("<div>" + list_users[i] + "</div>");
 			}
 		}
-
-		$(() => {
-			const socket = io.connect();
-
-			$("#msg-form").submit((event) => {
-				event.preventDefault();
-
-				const $input = $("#msg");
-				if (checkOfCorrectMsg($input.val())) {
-					alert("Error!");
-					$input.val('');
-					return;
-				}
-				socket.emit('send msg', { msg: $input.val() });
-				$input.val('');
-			});
-
-			socket.on('add msg', (data) => {
-				$("#all-msg").append("<div>" + data.name + ': ' + data.msg + "</div>");
-			});
-
-			socket.on('send all users', (data) => {
-				list_users.push(data.name);
-				show();
-			});
-
-			socket.on('append user', (data) => {
-				list_users.push(data.name);
-				show();
-			});
-
-			socket.on('delete user', (data) => {
-				list_users.splice(list_users.indexOf(data.name), 1);
-				show();
-			});
-		});
 	</script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="/static/client.js"></script>
 </body>
 </html>

@@ -1,7 +1,10 @@
-const app = require('express')();
+const express = require('express');
+const app = express();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 const urlencodedParser = require("body-parser").urlencoded({extended: false});
+
+app.use('/static', express.static('static'));
 
 server.listen(process.env.PORT || 80);
 
