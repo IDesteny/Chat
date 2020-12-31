@@ -5,22 +5,11 @@
 	<h1> Авторизация </h1>
 </head>
 <body>
-	<form id="name-form" action="chat" method="post">
-		<input id="name", name="name">
+	<form id="name-input-form" action="chat" method="post">
+		<input id="name" name="name">
 		<button type="submit"> Send </button>
 	</form>
 
-	<script type="text/javascript">
-		function checkOfCorrectName(name) {
-			if (name.length >= 16) return true;
-			if (name.length == 0) return true;
-
-			for(let i = 0; i < name.length; ++i) {
-				if (name[i] != ' ') return false;
-			}
-			return true;
-		}
-	</script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
 	<script src="/static/auth.js"></script>
 </body>

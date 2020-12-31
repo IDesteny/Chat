@@ -31,10 +31,18 @@ io.sockets.on('connection', (socket) => {
 	connections.push({ name: name, socket: socket });
 
 	for (let i = 0; i < connections.length; ++i)
-		if (connections[i].name !== name) socket.emit('send all users', {name: connections[i].name});
+		if (connections[i].name !== name)
+		{
+			socket.emit('send all users', {name: connections[i].name});
+			break;
+		}
 
 	for (let i = 0; i < connections.length; ++i)
-		if (connections[i].name !== name) connections[i].socket.emit('append user', {name: name});
+		if (connections[i].name !== name)
+		{
+			connections[i].socket.emit('append user', {name: name});
+			break;
+		}
 
 	socket.on('disconnect', (data) => {
 		const index = getIndex(socket);
@@ -43,7 +51,16 @@ io.sockets.on('connection', (socket) => {
 	});
 
 	socket.on('send msg', (data) => {
+		io.sockets.emit('add msg', { name: connections[getIndex(socket)].name, msg: data.msg });
+	});
+
+	socket.on('send msg only', (data) => {
 		const index = getIndex(socket);
-		io.sockets.emit('add msg', { name: connections[index].name, msg: data.msg });
+		if (connections[index].name === data.name) return;
+
+		for (let i = 0; i < connections.length; ++i)
+			if (data.name === connections[i].name)
+				connections[i].socket.emit('add msg only you', { name: connections[index].name, msg: data.msg });
+		connections[index].socket.emit('add msg only me', { name: data.name, msg: data.msg });
 	});
 });
