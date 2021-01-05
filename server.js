@@ -4,63 +4,65 @@ const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 const urlencodedParser = require("body-parser").urlencoded({extended: false});
 
-app.use('/static', express.static('static'));
+app.use('/scripts', express.static('scripts'));
 
 server.listen(process.env.PORT || 80);
 
-connections = [];
-
-function getIndex(socket) {
-	let index;
-	for (let i = 0; i < connections.length; ++i)
-  		if (connections[i].socket == socket) index = i;
-  	return index;
-}
-
 app.get('/', (req, res) => {
-	res.sendFile(__dirname + '/index.html');
+	res.sendFile(__dirname + '/auth.html');
 });
 
-let name;
+let username;
 app.post('/chat', urlencodedParser, (req, res) => {
 	res.sendFile(__dirname + '/chat.html');
-	name = req.body.name;
+	username = req.body.value;
 });
 
+connections = [];
+function get_item(socket) {
+	for (let i = 0; i < connections.length; ++i) {
+		if (connections[i].socket === socket) {
+			return connections[i];
+		}
+	}
+}
+
 io.sockets.on('connection', (socket) => {
-	connections.push({ name: name, socket: socket });
+	connections.push({ name: username, socket: socket });
 
-	for (let i = 0; i < connections.length; ++i)
-		if (connections[i].name !== name)
-		{
-			socket.emit('send all users', {name: connections[i].name});
-			break;
+	for (let i = 0; i < connections.length; ++i) {
+		if (connections[i].name !== username) {
+			socket.emit('update-users', { name: connections[i].name, type: 'add' });
 		}
+	}
 
-	for (let i = 0; i < connections.length; ++i)
-		if (connections[i].name !== name)
-		{
-			connections[i].socket.emit('append user', {name: name});
-			break;
+	for (let i = 0; i < connections.length; ++i) {
+		if (connections[i].name !== username) {
+			connections[i].socket.emit('update-users', { name: username, type: 'add' });
 		}
+	}
 
-	socket.on('disconnect', (data) => {
-		const index = getIndex(socket);
-		io.sockets.emit('delete user', { name: connections[index].name });
-		connections.splice(index, 1);
+	socket.on('send-msg', (data) => {
+		const user = get_item(socket);
+
+		if (data.type === 'simple') {
+			io.sockets.emit('get-msg', { name: user.name, msg: data.msg, type: 'simple' });
+
+		} else {
+			for (let i = 0; i < connections.length; ++i) {
+				if (connections[i].name === data.name) {
+					connections[i].socket.emit('get-msg', { name: user.name, msg: data.msg, type: 'getter' });
+				}
+			}
+
+			user.socket.emit('get-msg', { name: data.name, msg: data.msg, type: 'sender' });
+		}
 	});
 
-	socket.on('send msg', (data) => {
-		io.sockets.emit('add msg', { name: connections[getIndex(socket)].name, msg: data.msg });
-	});
+	socket.on('disconnect', () => {
+		const user = get_item(socket);
 
-	socket.on('send msg only', (data) => {
-		const index = getIndex(socket);
-		if (connections[index].name === data.name) return;
-
-		for (let i = 0; i < connections.length; ++i)
-			if (data.name === connections[i].name)
-				connections[i].socket.emit('add msg only you', { name: connections[index].name, msg: data.msg });
-		connections[index].socket.emit('add msg only me', { name: data.name, msg: data.msg });
+		io.sockets.emit('update-users', { name: user.name, type: 'delete' });
+		connections.splice(connections.indexOf(user), 1);
 	});
 });

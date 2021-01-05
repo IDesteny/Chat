@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title> Authorization </title>
+</head>
+<body>
+	<h1> Enter your name </h1>
+
+	<form id="name-form" action="chat" method="post">
+		<input id="id-name" name="value" maxlength="16">
+		<button type="submit"> Enter </button>
+	</form>
+
+	<script type="text/javascript">
+		function err_invalid_name() {
+			alert('Invalid name entered');
+		}
+	</script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+	<script src="scripts/auth.js"></script>
+</body>
+</html>

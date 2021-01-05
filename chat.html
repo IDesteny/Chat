@@ -2,38 +2,32 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<h1> Добро пожаловать </h1>
+	<title> Chat </title>
 </head>
 <body>
-	<form id="msg-form">
-		<input id="msg" style="float: left">
-		<button type="submit" style="float: left; margin: 0px 5px"> Send </button>
+	<div id="info"></div>
+
+	<form id="msg-form" style="float: left; margin: 0px 4px 0px 0px">
+		<input id="msg" maxlength="128">
+		<button type="submit"> Send </button>
 	</form>
-	
-	<button onclick="clearMsg()"> Clear </button>
-	<div style="margin: 0px 500px"> Connections </div>
 
-	<div> ------------------------------------------------------------------------------------------------------------- </div>
+	<button onclick="clear_msgs()"> Clear </button>
 
-	<div id="all-msg" style="float: left"></div>
-	<div id="all-users" style="margin: 0px 500px"></div>
+	<div style="margin: 15px 0px 0px 0px">
+		<div style="float: left"> Messages </div>
+		<div style="margin: 0px 0px 0px 500px"> Connections </div>
+		<div>-------------------------------------------------------------------------------------------------------------</div>
+	</div>
 
-	<script type="text/javascript">
-		list_users = [];
+	<div>
+		<div id="msgs" style="float: left"></div>
+		<div id="users" style="margin: 0px 0px 0px 500px"></div>
+	</div>
 
-		function show() {
-			$("#all-users").empty();
-			for (let i = 0; i < list_users.length; ++i) {
-				$("#all-users").append("<div>" + list_users[i] + "</div>");
-			}
-		}
-
-		function clearMsg() {
-			$("#all-msg").empty();
-		}
-	</script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+	<script src="scripts/front_script.js"></script>
 	<script src="/socket.io/socket.io.js"></script>
-	<script src="/static/client.js"></script>
+	<script src="scripts/chat.js"></script>
 </body>
 </html>
