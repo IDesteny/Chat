@@ -33,10 +33,10 @@ function update_users(name, type) {
 	}
 }
 
-function clear_msgs() {
-	list_msg = [];
+$("#clear-msg").click(() => {
 	$("#msgs").empty();
-}
+	list_msg = [];
+});
 
 let send_him = null;
 function send_only(elementId) {
