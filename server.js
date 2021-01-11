@@ -27,14 +27,30 @@ function get_user(socket) {
 	}
 }
 
-function getDate() {
+function get_user_send_to(name) {
+	for (let i = 0; i < connections.length; ++i) {
+		if (connections[i].name === name) {
+			return connections[i].socket;
+		}
+	}
+}
+
+function event_connections_user(socket) {
+	for (let i = 0; i < connections.length; ++i) {
+		if (connections[i].name !== username) {
+			socket.emit('update-users', { name: connections[i].name, type: 'add' });
+			connections[i].socket.emit('update-users', { name: username, type: 'add' });
+		}
+	}
+}
+
+function correctTime(time) {
+	return String(time).length === 1 ? '0' + time : time;
+}
+
+function getTime() {
 	const date_ob = new Date();
-	const date = date_ob.getFullYear() + '.'
-				+ date_ob.getMonth() + '.'
-				+ date_ob.getDate() + ' '
-				+ date_ob.getHours() + ':'
-				+ date_ob.getMinutes() + ':'
-				+ date_ob.getSeconds();
+	const date = correctTime(date_ob.getHours()) + ':' + correctTime(date_ob.getMinutes());
 
 	return date;
 }
@@ -42,26 +58,17 @@ function getDate() {
 io.sockets.on('connection', socket => {
 	connections.push({ name: username, socket: socket });
 
-	for (let i = 0; i < connections.length; ++i) {
-		if (connections[i].name !== username) {
-			socket.emit('update-users', { name: connections[i].name, type: 'add' });
-			connections[i].socket.emit('update-users', { name: username, type: 'add' });
-		}
-	}
+	event_connections_user(socket);
 
 	socket.on('send-msg', data => {
 		const user = get_user(socket);
 
 		if (data.to === null) {
-			io.sockets.emit('get-msg', { name: user.name, msg: data.msg, type: 'all' });
-
+			io.sockets.emit('get-msg', { name: user.name, msg: data.msg, time: getTime(), type: 'all' });
 		} else {
-			for (let i = 0; i < connections.length; ++i) {
-				if (connections[i].name === data.to) {
-					connections[i].socket.emit('get-msg', { name: user.name, msg: data.msg, type: 'getter' });
-				}
-			}
-			user.socket.emit('get-msg', { name: data.to, msg: data.msg, type: 'sender' });
+			get_user_send_to(data.to).emit('get-msg', { name: user.name, msg: data.msg, time: getTime(), type: 'getter' });
+
+			user.socket.emit('get-msg', { name: data.to, msg: data.msg, time: getTime(), type: 'sender' });
 		}
 	});
 

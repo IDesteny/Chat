@@ -6,15 +6,15 @@ function add_msg(data) {
 
 	switch (data.type) {
 		case 'all':
-			$("#msgs").append("<div>" + '&#60;' + data.name + '&#62; ' + data.msg + "</div>");
+			$("#msgs").append("<div>" + data.time + ' &#60;' + data.name + '&#62; ' + data.msg + "</div>");
 		break;
 
 		case 'sender':
-			$("#msgs").append("<div>" + '&#60;you => ' + data.name + '&#62; ' + data.msg + "</div>");
+			$("#msgs").append("<div>" + data.time + ' &#60;you => ' + data.name + '&#62; ' + data.msg + "</div>");
 		break;
 
 		case 'getter':
-			$("#msgs").append("<div>" + '&#60;' + data.name + ' => you&#62; ' + data.msg + "</div>");
+			$("#msgs").append("<div>" + data.time + ' &#60;' + data.name + ' => you&#62; ' + data.msg + "</div>");
 		break;
 	}
 }
