@@ -2,21 +2,21 @@ const express = require('express');
 const app = express();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
-const urlencodedParser = require("body-parser").urlencoded({ extended: false });
 const fs = require('fs');
 
 app.use('/scripts', express.static('scripts'));
 
 server.listen(process.env.PORT || 80);
 
+let username;
 app.get('/', (req, res) => {
-	res.sendFile(__dirname + '/auth.html');
+	username = req.headers['cookie'];
+	res.sendFile(__dirname + (username ? '/chat.html' : '/auth.html'));
 });
 
-let username;
-app.post('/chat', urlencodedParser, (req, res) => {
+app.post('/chat', (req, res) => {
+	username = req.headers['cookie'];
 	res.sendFile(__dirname + '/chat.html');
-	username = req.body.value;
 });
 
 connections = [];
@@ -30,7 +30,7 @@ function get_user(socket) {
 
 function getDate() {
 	const date_ob = new Date();
-	const date =  date_ob.getFullYear() + '.'
+	const date = date_ob.getFullYear() + '.'
 				+ date_ob.getMonth() + '.'
 				+ date_ob.getDate() + ' '
 				+ date_ob.getHours() + ':'
@@ -44,7 +44,7 @@ function writeFile(msg) {
 	fs.writeFile('info.log', getDate() + ' ' + msg + '\r\n', { flag: 'a' }, (err) => {});
 }
 
-io.sockets.on('connection', (socket) => {
+io.sockets.on('connection', socket => {
 	connections.push({ name: username, socket: socket });
 	writeFile('User <' + username + '> is connected');
 
@@ -55,7 +55,7 @@ io.sockets.on('connection', (socket) => {
 		}
 	}
 
-	socket.on('send-msg', (data) => {
+	socket.on('send-msg', data => {
 		const user = get_user(socket);
 		let msg;
 
@@ -81,5 +81,7 @@ io.sockets.on('connection', (socket) => {
 		const user = get_user(socket);
 		io.sockets.emit('update-users', { name: user.name, type: 'delete' });
 		connections.splice(connections.indexOf(user), 1);
+
+		writeFile('User <' + user.name + '> is disabled');
 	});
 });

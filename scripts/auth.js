@@ -1,12 +1,11 @@
 $(() => {
 	$("#name-form").submit(() => {
 		const name = $("#id-name").val();
-		const regex = /^[a-zA-Z]\S/;
-		const result = name.match(regex);
-
-		if (result === null) {
+		
+		if (name.match(/^[a-zA-Z]\S/) === null) {
 			err_invalid_name();
 			event.preventDefault();
-		}
+		} else
+			document.cookie = name;
 	});
 });

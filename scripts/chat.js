@@ -1,7 +1,7 @@
 $(() => {
 	const socket = io.connect();
 
-	$("#msg-form").submit((event) => {
+	$("#msg-form").submit(event => {
 		event.preventDefault();
 		const msg = $("#msg").val();
 
@@ -14,11 +14,11 @@ $(() => {
 		$("#msg").val('');
 	});
 
-	socket.on('get-msg', (data) => {
+	socket.on('get-msg', data => {
 		add_msg(data);
 	});
 
-	socket.on('update-users', (data) => {
+	socket.on('update-users', data => {
 		update_users(data);
 	});
 });
