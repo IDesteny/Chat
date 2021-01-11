@@ -2,7 +2,6 @@ const express = require('express');
 const app = express();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
-const fs = require('fs');
 
 app.use('/scripts', express.static('scripts'));
 
@@ -40,13 +39,8 @@ function getDate() {
 	return date;
 }
 
-function writeFile(msg) {
-	fs.writeFile('info.log', getDate() + ' ' + msg + '\r\n', { flag: 'a' }, (err) => {});
-}
-
 io.sockets.on('connection', socket => {
 	connections.push({ name: username, socket: socket });
-	writeFile('User <' + username + '> is connected');
 
 	for (let i = 0; i < connections.length; ++i) {
 		if (connections[i].name !== username) {
@@ -57,11 +51,9 @@ io.sockets.on('connection', socket => {
 
 	socket.on('send-msg', data => {
 		const user = get_user(socket);
-		let msg;
 
 		if (data.to === null) {
 			io.sockets.emit('get-msg', { name: user.name, msg: data.msg, type: 'all' });
-			msg = '<' + user.name + '> ' + data.msg;
 
 		} else {
 			for (let i = 0; i < connections.length; ++i) {
@@ -70,18 +62,12 @@ io.sockets.on('connection', socket => {
 				}
 			}
 			user.socket.emit('get-msg', { name: data.to, msg: data.msg, type: 'sender' });
-
-			msg = '<' + user.name + ' => ' + data.to + '> ' + data.msg;
 		}
-
-		writeFile(msg);
 	});
 
 	socket.on('disconnect', () => {
 		const user = get_user(socket);
 		io.sockets.emit('update-users', { name: user.name, type: 'delete' });
 		connections.splice(connections.indexOf(user), 1);
-
-		writeFile('User <' + user.name + '> is disabled');
 	});
 });
