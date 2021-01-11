@@ -1,31 +1,31 @@
 list_msg = [];
 list_users = [];
 
-function add_msg(name, msg, type) {
-	list_msg.push({ name: name, msg: msg, type: type });
+function add_msg(data) {
+	list_msg.push(data);
 
-	switch (type) {
-		case 'simple':
-			$("#msgs").append("<div>" + '&#60;' + name + '&#62; ' + msg + "</div>");
+	switch (data.type) {
+		case 'all':
+			$("#msgs").append("<div>" + '&#60;' + data.name + '&#62; ' + data.msg + "</div>");
 		break;
 
 		case 'sender':
-			$("#msgs").append("<div>" + '&#60;you => ' + name + '&#62; ' + msg + "</div>");
+			$("#msgs").append("<div>" + '&#60;you => ' + data.name + '&#62; ' + data.msg + "</div>");
 		break;
 
 		case 'getter':
-			$("#msgs").append("<div>" + '&#60;' + name + ' => you&#62; ' + msg + "</div>");
+			$("#msgs").append("<div>" + '&#60;' + data.name + ' => you&#62; ' + data.msg + "</div>");
 		break;
 	}
 }
 
-function update_users(name, type) {
-	if (type === 'add') {
-		list_users.push(name);
-		$("#users").append("<div onclick=\"send_only(this)\">" + name + "</div>");
+function update_users(data) {
+	if (data.type === 'add') {
+		list_users.push(data.name);
+		$("#users").append("<div onclick=\"send_only(this)\">" + data.name + "</div>");
 
 	} else {
-		list_users.splice(list_users.indexOf(name), 1);
+		list_users.splice(list_users.indexOf(data.name), 1);
 		$("#users").empty();
 		for (let i = 0; i < list_users.length; ++i) {
 			$("#users").append("<div onclick=\"send_only(this)\">" + list_users[i] + "</div>");

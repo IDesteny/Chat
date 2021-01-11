@@ -3,6 +3,7 @@ const app = express();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 const urlencodedParser = require("body-parser").urlencoded({ extended: false });
+const fs = require('fs');
 
 app.use('/scripts', express.static('scripts'));
 
@@ -19,7 +20,7 @@ app.post('/chat', urlencodedParser, (req, res) => {
 });
 
 connections = [];
-function get_item(socket) {
+function get_user(socket) {
 	for (let i = 0; i < connections.length; ++i) {
 		if (connections[i].socket === socket) {
 			return connections[i];
@@ -27,37 +28,57 @@ function get_item(socket) {
 	}
 }
 
-function send_connection_event(socket) {
+function getDate() {
+	const date_ob = new Date();
+	const date =  date_ob.getFullYear() + '.'
+				+ date_ob.getMonth() + '.'
+				+ date_ob.getDate() + ' '
+				+ date_ob.getHours() + ':'
+				+ date_ob.getMinutes() + ':'
+				+ date_ob.getSeconds();
+
+	return date;
+}
+
+function writeFile(msg) {
+	fs.writeFile('info.log', getDate() + ' ' + msg + '\r\n', { flag: 'a' }, (err) => {});
+}
+
+io.sockets.on('connection', (socket) => {
+	connections.push({ name: username, socket: socket });
+	writeFile('User <' + username + '> is connected');
+
 	for (let i = 0; i < connections.length; ++i) {
 		if (connections[i].name !== username) {
 			socket.emit('update-users', { name: connections[i].name, type: 'add' });
 			connections[i].socket.emit('update-users', { name: username, type: 'add' });
 		}
 	}
-}
-
-io.sockets.on('connection', (socket) => {
-	connections.push({ name: username, socket: socket });
-
-	send_connection_event(socket);
 
 	socket.on('send-msg', (data) => {
-		const user = get_item(socket);
+		const user = get_user(socket);
+		let msg;
 
-		if (data.type === 'simple') {
-			io.sockets.emit('get-msg', { name: user.name, msg: data.msg, type: 'simple' });
+		if (data.to === null) {
+			io.sockets.emit('get-msg', { name: user.name, msg: data.msg, type: 'all' });
+			msg = '<' + user.name + '> ' + data.msg;
+
 		} else {
 			for (let i = 0; i < connections.length; ++i) {
-				if (connections[i].name === data.name) {
+				if (connections[i].name === data.to) {
 					connections[i].socket.emit('get-msg', { name: user.name, msg: data.msg, type: 'getter' });
 				}
 			}
-			user.socket.emit('get-msg', { name: data.name, msg: data.msg, type: 'sender' });
+			user.socket.emit('get-msg', { name: data.to, msg: data.msg, type: 'sender' });
+
+			msg = '<' + user.name + ' => ' + data.to + '> ' + data.msg;
 		}
+
+		writeFile(msg);
 	});
 
 	socket.on('disconnect', () => {
-		const user = get_item(socket);
+		const user = get_user(socket);
 		io.sockets.emit('update-users', { name: user.name, type: 'delete' });
 		connections.splice(connections.indexOf(user), 1);
 	});

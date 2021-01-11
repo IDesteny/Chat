@@ -4,28 +4,21 @@ $(() => {
 	$("#msg-form").submit((event) => {
 		event.preventDefault();
 		const msg = $("#msg").val();
-		const regex = /^\S.*/;
-		const res = msg.match(regex);
 
-		if (res === null) {
+		if (msg.match(/^\S.*/) === null)
 			err_invalid_msg();
-			return;
-		}
-
-		if (send_him !== null) {
-			socket.emit('send-msg', { msg: msg, name: send_him, type: 'private-msg' });
-		} else {
-			socket.emit('send-msg', { msg: msg, type: 'simple'});
+		else {
+			socket.emit('send-msg', { msg: msg, to: send_him });
 		}
 		
 		$("#msg").val('');
 	});
 
 	socket.on('get-msg', (data) => {
-		add_msg(data.name, data.msg, data.type);
+		add_msg(data);
 	});
 
 	socket.on('update-users', (data) => {
-		update_users(data.name, data.type);
+		update_users(data);
 	});
 });
