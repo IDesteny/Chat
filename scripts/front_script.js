@@ -1,7 +1,7 @@
 list_msg = [];
 list_users = [];
 
-function add_msg(data) {
+const add_msg = data {
 	list_msg.push(data);
 
 	switch (data.type) {
@@ -19,7 +19,7 @@ function add_msg(data) {
 	}
 }
 
-function update_users(data) {
+const update_users = data {
 	if (data.type === 'add') {
 		list_users.push(data.name);
 		$("#users").append("<div onclick=\"send_only(this)\">" + data.name + "</div>");
@@ -39,13 +39,13 @@ $("#clear-msg").click(() => {
 });
 
 let send_him = null;
-function send_only(elementId) {
+const send_only = elementId {
 	$("#info").empty();
 	send_him = elementId.innerText;
 	$("#info").append("<div>" + 'send only ' + '"' + send_him + '" (click on me to cancel)' + "<div>");
 }
 
-function err_invalid_msg() {
+const err_invalid_msg = () {
 	alert('Invalid message entered');
 }
 
